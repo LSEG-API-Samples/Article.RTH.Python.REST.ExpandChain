@@ -6,13 +6,15 @@ from getpass import _raw_input as input
 from getpass import getpass
 from getpass import GetPassWarning
 import os
+from collections import OrderedDict
+import pandas as pd
+import numpy as np
+
 
 _LoginToken=""
 _chainRIC = "0#.FTSE"
 _startDate="2017-06-05T00:00:00.000Z"
 _endDate="2017-06-17T00:00:00.000Z"
-_outputFilePath="./"
-_outputFileName="RICList"
 
 def RequestNewToken(username="",password=""):
     _AuthenURL = "https://hosted.datascopeapi.reuters.com/RestApi/v1/Authentication/RequestToken"
@@ -44,17 +46,12 @@ def ExpandChain(token,json_payload):
     resp = post(_expandChainURL, data=None, json=json_payload, headers=_header)
     item_list = []
     if(resp.status_code==200):
-        #comment below line if you don't want to print response message to console 
-        print(dumps(loads(resp.text),indent=4))
-        json_object=loads(resp.text)
-        if len(json_object['value'])>0:
-            for identifier_set in json_object['value']:
-                for var in identifier_set['Constituents']:
-                    item_list.append(var['Identifier'])
+        json_object=loads(resp.text,object_pairs_hook=OrderedDict)
+        dataFrame = pd.DataFrame.from_dict(json_object['value'][0]['Constituents'])
     else:
         print("Unable to expand chain response return status code:",resp.status_code)
 
-    return item_list
+    return dataFrame
 
 
 def main():
@@ -66,6 +63,7 @@ def main():
             _token=RequestNewToken(_DSSUsername,_DSSPassword)
         except GetPassWarning as e:
              print(e)
+
         if(_token!=""):
             print("Authorization Token:"+_token+"\n")
             _jsonquery={
@@ -80,20 +78,15 @@ def main():
                          }
             }
             print("Start Expanding Chain "+_chainRIC+"\n")
-            item_list=ExpandChain(_token,_jsonquery)
-            if(len(item_list)>0):
-                 #Write Output to file.
-                print("\nFound "+str(len(item_list))+" RIC under Chain RIC:"+_chainRIC)
-                outputfilepath = str(_outputFilePath + _outputFileName + str(os.getpid()) + '.txt')
-                fh=open(outputfilepath, 'w')
-                print("Open "+outputfilepath+" for writing item list")
-                for itemname in item_list:
-                        linestr=itemname+"\n"
-                        fh.writelines(linestr)
-                print("Write output to "+outputfilepath+" completed")
-                fh.close()
-            else:
-                print("Unable to expand chain")
+            df=ExpandChain(_token,_jsonquery)
+            ricCount=len(df['Identifier'])
+            print("Found "+str(ricCount)+" RIC")
+            #Filter and print online RIC name and Status
+            pd.set_option('display.max_rows', ricCount)
+            newDF = df.filter(items=['Identifier','Status'])
+            newDF.index = np.arange(1,len(newDF)+1)
+            print(newDF)
+            pd.reset_option('display.max_rows')
                 
     except Exception as ex:
         print("Exception occrus:", ex)
