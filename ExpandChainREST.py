@@ -12,7 +12,7 @@ import numpy as np
 
 
 _LoginToken=""
-_chainRIC = "0#.FTSE"
+_chainRIC = "0#.SETI"
 _startDate="2017-06-05T00:00:00.000Z"
 _endDate="2017-06-17T00:00:00.000Z"
 
@@ -47,7 +47,10 @@ def ExpandChain(token,json_payload):
     item_list = []
     if(resp.status_code==200):
         json_object=loads(resp.text,object_pairs_hook=OrderedDict)
-        dataFrame = pd.DataFrame.from_dict(json_object['value'][0]['Constituents'])
+        if len(json_object['value']) > 0:
+            dataFrame = pd.DataFrame.from_dict(json_object['value'][0]['Constituents'])
+        else:
+            return pd.DataFrame()
     else:
         print("Unable to expand chain response return status code:",resp.status_code)
 
@@ -79,15 +82,19 @@ def main():
             }
             print("Start Expanding Chain "+_chainRIC+"\n")
             df=ExpandChain(_token,_jsonquery)
+            if df.empty:
+                print("Unable to expand chain "+_chainRIC) 
+                return
+
             ricCount=len(df['Identifier'])
             print("Found "+str(ricCount)+" RIC")
-            #Filter and print online RIC name and Status
+            #Filter and print only RIC name and Status columns
             pd.set_option('display.max_rows', ricCount)
             newDF = df.filter(items=['Identifier','Status'])
             newDF.index = np.arange(1,len(newDF)+1)
             print(newDF)
             pd.reset_option('display.max_rows')
-                
+              
     except Exception as ex:
         print("Exception occrus:", ex)
 

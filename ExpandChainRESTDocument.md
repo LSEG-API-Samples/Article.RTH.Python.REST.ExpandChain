@@ -110,9 +110,9 @@ https://www.python.org
 ```
 * In order to access Tick Historical end point, user must have DSS account with permission to access Tick Historical’s REST API. Please contact Thomson Reuters Account representative if you need a new account or additional permission.
  
-* To use HTTP request and response, This example use Python requests module. If user don’t have requests installed in python library
+* To use HTTP request and response, This example use Python requests module. If user don’t have requests installed in python library.
 
-* This example use pandas data frame and some function from numpy to parse and display data so you need install pandas and numpy module
+* This example use pandas data frame and some function from numpy to parse and display data so you have to install pandas and numpy module.
 
 #### Implementation
 
@@ -170,7 +170,10 @@ def ExpandChain(token,json_payload):
     item_list = []
     if(resp.status_code==200):
         json_object=loads(resp.text,object_pairs_hook=OrderedDict)
-        dataFrame = pd.DataFrame.from_dict(json_object['value'][0]['Constituents'])
+        if len(json_object['value']) > 0:
+            dataFrame = pd.DataFrame.from_dict(json_object['value'][0]['Constituents'])
+        else:
+            return pd.DataFrame()
     else:
         print("Unable to expand chain response return status code:",resp.status_code)
 
@@ -180,7 +183,7 @@ def ExpandChain(token,json_payload):
 
 ```python
 #In the Main function
-_jsonquery={
+            _jsonquery={
                         "Request": {
                             "ChainRics": [
                                     _chainRIC
@@ -193,14 +196,18 @@ _jsonquery={
             }
             print("Start Expanding Chain "+_chainRIC+"\n")
             df=ExpandChain(_token,_jsonquery)
+            if df.empty:
+                print("Unable to expand chain "+_chainRIC) 
+                return
+
             ricCount=len(df['Identifier'])
             print("Found "+str(ricCount)+" RIC")
-            #Filter and print online RIC name and Status
+            #Filter and print Only RIC name and Status columns
             pd.set_option('display.max_rows', ricCount)
             newDF = df.filter(items=['Identifier','Status'])
             newDF.index = np.arange(1,len(newDF)+1)
             print(newDF)
-            pd.reset_option('display.max_rows')
+
 ```
 **Running example**
 
