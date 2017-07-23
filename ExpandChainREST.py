@@ -12,7 +12,7 @@ import numpy as np
 
 
 _LoginToken=""
-_chainRIC = "0#.SETI"
+_chainRIC = "0#.SETI1"
 _startDate="2017-06-05T00:00:00.000Z"
 _endDate="2017-06-17T00:00:00.000Z"
 
@@ -44,13 +44,12 @@ def ExpandChain(token,json_payload):
     _header['Accept-Charset'] = 'UTF-8'
     _header['Authorization'] = 'Token' + token
     resp = post(_expandChainURL, data=None, json=json_payload, headers=_header)
-    item_list = []
+    
+    dataFrame= pd.DataFrame()
     if(resp.status_code==200):
         json_object=loads(resp.text,object_pairs_hook=OrderedDict)
         if len(json_object['value']) > 0:
             dataFrame = pd.DataFrame.from_dict(json_object['value'][0]['Constituents'])
-        else:
-            return pd.DataFrame()
     else:
         print("Unable to expand chain response return status code:",resp.status_code)
 
