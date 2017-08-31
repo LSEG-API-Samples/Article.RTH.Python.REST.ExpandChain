@@ -39,7 +39,7 @@ def RequestNewToken(username="",password=""):
 def ExpandChain(token,json_payload):
     _expandChainURL = "https://hosted.datascopeapi.reuters.com/RestApi/v1/Search/HistoricalChainResolution"
     _header = {}
-    _header['Prefer'] = 'respond-async, wait=5'
+    _header['Prefer'] = 'respond-async'
     _header['Content-Type'] = 'application/json; odata.metadata=minimal'
     _header['Accept-Charset'] = 'UTF-8'
     _header['Authorization'] = 'Token' + token
