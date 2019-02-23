@@ -12,7 +12,7 @@ import numpy as np
 
 
 _LoginToken=""
-_chainRIC = "0#.SETI1"
+_chainRIC = "0#.SETI"
 _startDate="2017-06-05T00:00:00.000Z"
 _endDate="2017-06-17T00:00:00.000Z"
 
