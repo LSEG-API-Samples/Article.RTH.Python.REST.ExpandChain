@@ -17,7 +17,7 @@ _startDate="2017-06-05T00:00:00.000Z"
 _endDate="2017-06-17T00:00:00.000Z"
 
 def RequestNewToken(username="",password=""):
-    _AuthenURL = "https://selectapi.datascope.refinitiv.com/RestApi/v1/Authentication/RequestToken"
+    _AuthenURL = "https://selectapi.datascope.lseg.com/RestApi/v1/Authentication/RequestToken"
     _header= {}
     _header['Prefer']='respond-async'
     _header['Content-Type']='application/json; odata.metadata=minimal'
@@ -37,7 +37,7 @@ def RequestNewToken(username="",password=""):
     return loads(resp.text)['value']
 
 def ExpandChain(token,json_payload):
-    _expandChainURL = "https://selectapi.datascope.refinitiv.com/RestApi/v1/Search/HistoricalChainResolution"
+    _expandChainURL = "https://selectapi.datascope.lseg.com/RestApi/v1/Search/HistoricalChainResolution"
     _header = {}
     _header['Prefer'] = 'respond-async'
     _header['Content-Type'] = 'application/json; odata.metadata=minimal'
@@ -101,3 +101,4 @@ def main():
 
 if __name__=="__main__":
     main()
+
